@@ -1,1 +1,2 @@
-java -cp target/CSharpRefitCodegen-swagger-codegen-1.0.2.jar;tools/swagger-codegen-cli-2.2.3.jar io.swagger.codegen.SwaggerCodegen generate -l csharprefit %*
+echo java -cp target/CSharpRefitCodegen-swagger-codegen-1.0.2.jar;tools/swagger-codegen-cli.jar io.swagger.codegen.SwaggerCodegen generate -l csharprefit -i https://sandbox-api.marqeta.com/v3/swagger.json -o clients/marqeta --api-package Api --model-package Models -DmodelTests=false -DapiTests=true -DpackageName=ZapMiddleware.External.Marqeta
+java -cp target/CSharpRefitCodegen-swagger-codegen-1.0.2.jar;tools/swagger-codegen-cli.jar io.swagger.codegen.SwaggerCodegen generate -l csharprefit %*

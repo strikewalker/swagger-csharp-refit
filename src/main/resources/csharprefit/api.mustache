@@ -1,15 +1,5 @@
 {{>partial_header}}
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-{{#netStandard}}
-// TODO does this work?
-using Refit.Portable;
-{{/netStandard}}
-{{^netStandard}}
-using Refit;
-{{/netStandard}}
+using System.Threading.Tasks;
 using {{packageName}}.Client;
 {{#hasImport}}using {{packageName}}.{{modelPackage}};
 {{/hasImport}}
@@ -18,12 +8,10 @@ namespace {{packageName}}.{{apiPackage}}
 {
     {{#operations}}
     /// <summary>
-    /// Represents a collection of functions to interact with the API endpoints
+    /// Represents an interface to interact with the {{classname}} API endpoints
     /// </summary>
     {{>visibility}} interface {{interfacePrefix}}{{classname}}
     {
-        {{#supportsAsync}}
-        #region Asynchronous Operations
         {{#operation}}
 
         /// <summary>
@@ -32,14 +20,42 @@ namespace {{packageName}}.{{apiPackage}}
         /// <remarks>
         /// {{notes}}
         /// </remarks>
-        /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}</param>
+        /// <exception cref="ApiException">Thrown when fails to make API call</exception>
+        {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}}{{#isBodyParam}} The request body{{/isBodyParam}}{{^isBodyParam}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/isBodyParam}}{{/required}}</param>
         {{/allParams}}/// <returns>Task of {{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}void{{/returnType}}</returns>
-        [{{httpMethod}}("{{#netStandard}}.{{/netStandard}}{{{path}}}")]
-        {{#returnType}}System.Threading.Tasks.Task<{{#returnTypePackageName}}{{{returnTypePackageName}}}.{{/returnTypePackageName}}{{{returnType}}}>{{/returnType}}{{^returnType}}System.Threading.Tasks.Task{{/returnType}} {{operationId}}([Header("UserAgent")] string userAgent{{#hasParams}}, {{/hasParams}}{{#allParams}}{{#isBodyParam}}[Body]{{/isBodyParam}}{{#isPathParam}}[AliasAs("{{paramName}}")]{{/isPathParam}}{{#isQueryParam}}[AliasAs("{{paramName}}")]{{/isQueryParam}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = null{{/optionalMethodArgument}}{{/required}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
+        {{#returnType}}Task<{{#returnTypePackageName}}{{{returnTypePackageName}}}.{{/returnTypePackageName}}{{{returnType}}}>{{/returnType}}{{^returnType}}System.Threading.Tasks.Task{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}}{{^isBodyParam}} = null{{/isBodyParam}}{{/optionalMethodArgument}}{{/required}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
         {{/operation}}
-        #endregion Asynchronous Operations
-        {{/supportsAsync}}
+    }
+    /// <summary>
+    /// Represents a collection of functions to interact with the {{classname}} API endpoints
+    /// </summary>
+    {{>visibility}} class {{classname}}: {{interfacePrefix}}{{classname}}
+    {
+		private readonly IMarqetaClient _client;
+
+		public {{classname}}(IMarqetaClient client) {
+			_client = client;
+		}
+        {{#operation}}
+
+        /// <summary>
+        /// {{summary}}
+        /// </summary>
+        /// <remarks>
+        /// {{notes}}
+        /// </remarks>
+        /// <exception cref="ApiException">Thrown when fails to make API call</exception>
+        {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}}{{#isBodyParam}} The request body{{/isBodyParam}}{{^isBodyParam}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/isBodyParam}}{{/required}}</param>
+        {{/allParams}}/// <returns>Task of {{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}void{{/returnType}}</returns>
+        public {{#returnType}}Task<{{#returnTypePackageName}}{{{returnTypePackageName}}}.{{/returnTypePackageName}}{{{returnType}}}>{{/returnType}}{{^returnType}}System.Threading.Tasks.Task{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}}{{^isBodyParam}} = null{{/isBodyParam}}{{/optionalMethodArgument}}{{/required}}{{#hasMore}}, {{/hasMore}}{{/allParams}}){
+            return _client.{{httpMethod}}{{#returnType}}{{#returnTypePackageName}}{{{returnTypePackageName}}}.{{/returnTypePackageName}}<{{{returnType}}}>{{/returnType}}(
+                "{{{path}}}",
+                {{^pathParams}}null,//{{/pathParams}}new { {{#pathParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/pathParams}} },
+                {{^queryParams}}null{{#bodyParam}},{{/bodyParam}}//{{/queryParams}}new { {{#queryParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/queryParams}} }{{#bodyParam}},{{/bodyParam}}
+                {{#bodyParam}}{{paramName}}{{/bodyParam}}
+            );
+        }
+        {{/operation}}
     }
     {{/operations}}
 }

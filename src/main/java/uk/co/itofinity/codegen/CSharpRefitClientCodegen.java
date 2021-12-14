@@ -136,6 +136,10 @@ public class CSharpRefitClientCodegen extends AbstractCSharpCodegen {
         addSwitch(CodegenConstants.NETCORE_PROJECT_FILE,
                 CodegenConstants.NETCORE_PROJECT_FILE_DESC,
                 this.netCoreProjectFileFlag);
+                
+        addSwitch(CodegenConstants.NETCORE_PROJECT_FILE,
+                CodegenConstants.NETCORE_PROJECT_FILE_DESC,
+                this.netCoreProjectFileFlag);
 
         regexModifiers = new HashMap<Character, String>();
         regexModifiers.put('i', "IgnoreCase");
@@ -174,10 +178,9 @@ public class CSharpRefitClientCodegen extends AbstractCSharpCodegen {
         additionalProperties.put("clientPackage", clientPackage);
         additionalProperties.put("emitDefaultValue", optionalEmitDefaultValue);
 
-        if (!additionalProperties.containsKey("validatable")) {
-            // default validatable to true if not set
-            additionalProperties.put("validatable", true);
-        }
+        additionalProperties.put("validatable", additionalProperties.containsKey("validatable"));
+
+        additionalProperties.put("equatable", additionalProperties.containsKey("equatable"));
 
         if (additionalProperties.containsKey(CodegenConstants.DOTNET_FRAMEWORK)) {
             setTargetFramework((String) additionalProperties.get(CodegenConstants.DOTNET_FRAMEWORK));
