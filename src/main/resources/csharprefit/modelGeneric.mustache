@@ -34,7 +34,7 @@
         /// </summary>{{#description}}
         /// <value>{{description}}</value>{{/description}}
         [JsonProperty("{{baseName}}")]
-        public {{{datatype}}} {{name}} { get; {{#isReadOnly}}private {{/isReadOnly}}set; }
+        public {{{datatype}}} {{name}} { get; {{#isReadOnly}}private set;{{/isReadOnly}}{{^isReadOnly}}init;{{/isReadOnly}} }
         {{/isEnum}}
         {{/vars}}
 {{^netStandard}}
